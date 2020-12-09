@@ -8,7 +8,6 @@ import android.content.Context
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import java.nio.charset.Charset
 import java.util.*
 import java.util.regex.Pattern
 
@@ -49,26 +48,22 @@ class TimeBleDeviceManager(
             Log.i(LOGTAG, "GATT services discovered from server.")
             when(status) {
                 BluetoothGatt.GATT_SUCCESS -> {
-                    gatt?.services?.let {
-                        for (service in it) {
+                    gatt?.services?.let { services ->
+                        for (service in services) {
                             Log.d(LOGTAG, "Service found: ${service.uuid} of $service")
-                            if (service.uuid == TIME_SERVICE_UUID) {
-                                Log.d(LOGTAG, "Gotcha!")
-                                characteristics = service?.characteristics
-                                characteristics?.let {
-                                    for (characteristic in it) {
-                                        Log.d(LOGTAG, "Characteristic found: ${characteristic.uuid} of $characteristics")
-                                        if (characteristic.uuid == CURRENT_TIME_CHAR_UUID) {
-                                            currentTimeCharacteristic = characteristic
-                                            gatt.setCharacteristicNotification(currentTimeCharacteristic, true)
-                                            val descriptor = currentTimeCharacteristic.getDescriptor(CURRENT_TIME_CLIENT_CHAR_CONFIG_UUID)?.apply {
-                                                value = BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
-                                            }
-                                            gatt.writeDescriptor(descriptor)
-                                            Log.d(LOGTAG, "Wrote notification enable for $characteristic")
-                                        }
-                                    }
+                        }
+                        val service = gatt.getService(TIME_SERVICE_UUID)
+                        if (service.uuid == TIME_SERVICE_UUID) {
+                            Log.d(LOGTAG, "Gotcha!")
+                            characteristics = service?.characteristics
+                            characteristics?.let {
+                                currentTimeCharacteristic = service.getCharacteristic(CURRENT_TIME_CHAR_UUID)
+                                gatt.setCharacteristicNotification(currentTimeCharacteristic, true)
+                                val descriptor = currentTimeCharacteristic.getDescriptor(CURRENT_TIME_CLIENT_CHAR_CONFIG_UUID)?.apply {
+                                    value = BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
                                 }
+                                gatt.writeDescriptor(descriptor)
+                                Log.d(LOGTAG, "Wrote notification enable for $currentTimeCharacteristic")
                             }
                         }
                     }
