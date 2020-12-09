@@ -17,6 +17,7 @@ class TimeForegroundService : Service() {
     private var bluetoothAdapter: BluetoothAdapter? = null
     private var companionDeviceManager: CompanionDeviceManager? = null
 
+    //TODO: Actually make the service do something and present the required notification
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         companionDeviceManager =
             ContextCompat.getSystemService(this, CompanionDeviceManager::class.java)
