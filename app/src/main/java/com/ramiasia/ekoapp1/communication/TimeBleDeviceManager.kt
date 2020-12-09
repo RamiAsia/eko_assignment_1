@@ -9,7 +9,6 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.ramiasia.ekoapp1.utils.ByteConversionUtils.Companion.fromLittleEndian
-import java.nio.ByteBuffer
 import java.time.LocalDateTime
 import java.util.*
 import java.util.regex.Pattern
