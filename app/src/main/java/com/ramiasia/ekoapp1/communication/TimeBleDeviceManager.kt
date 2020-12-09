@@ -119,7 +119,7 @@ class TimeBleDeviceManager(
         }
 
         private fun parseTimeFrom(characteristic: BluetoothGattCharacteristic): String {
-//            characteristic.value.toString()
+            //TODO: Format value to an actual time lol
             return characteristic.value.joinToString(separator = " ") {
                 String.format("%02X", it)
             }
