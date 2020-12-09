@@ -1,6 +1,9 @@
 package com.ramiasia.ekoapp1.communication
 
-import android.bluetooth.BluetoothManager
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothGatt
+import android.bluetooth.BluetoothGattCallback
 import android.bluetooth.le.ScanResult
 import android.companion.AssociationRequest
 import android.companion.BluetoothDeviceFilter
@@ -8,14 +11,16 @@ import android.companion.CompanionDeviceManager
 import android.content.Context
 import java.util.regex.Pattern
 
-class TimeDeviceManager(context: Context?,
-                        private val deviceManager: CompanionDeviceManager?,
-                        private val bluetoothManager: BluetoothManager?,
-                        private val callBack: CompanionDeviceManager.Callback) {
+class TimeDeviceManager(
+        private val context: Context?,
+        private val deviceManager: CompanionDeviceManager?,
+        private val bluetoothAdapter: BluetoothAdapter?,
+        private val callBack: CompanionDeviceManager.Callback
+) {
 
-    init {
-        val bluetoothAdapter = bluetoothManager?.adapter
-    }
+//    private var bleGatt: BluetoothGatt? = null
+    private var bluetoothDevice: BluetoothDevice? = null
+
 
 
     fun scan() {
@@ -36,7 +41,9 @@ class TimeDeviceManager(context: Context?,
         deviceManager?.associate(pairingRequest, callBack, null)
     }
 
-    fun connect(scanResult: ScanResult) {
-
+    fun connect(bluetoothDevice: BluetoothDevice, bleGattCallback: BluetoothGattCallback) {
+//        bleGatt = scanResult.device.connectGatt(context, true, bleGattCallback)
+        bluetoothDevice.createBond()
+        bluetoothDevice.connectGatt(context, true, bleGattCallback)
     }
 }
