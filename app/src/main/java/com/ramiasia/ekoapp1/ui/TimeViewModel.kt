@@ -1,4 +1,4 @@
-package com.ramiasia.ekoapp1.ui.time
+package com.ramiasia.ekoapp1.ui
 
 import android.bluetooth.BluetoothDevice
 import androidx.lifecycle.LiveData

@@ -1,4 +1,4 @@
-package com.ramiasia.ekoapp1.ui.time
+package com.ramiasia.ekoapp1.ui
 
 import android.app.Activity
 import android.bluetooth.BluetoothAdapter

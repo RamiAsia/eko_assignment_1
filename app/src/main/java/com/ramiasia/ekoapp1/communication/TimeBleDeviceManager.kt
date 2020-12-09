@@ -8,6 +8,9 @@ import android.content.Context
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.ramiasia.ekoapp1.utils.ByteConversionUtils.Companion.fromLittleEndian
+import java.nio.ByteBuffer
+import java.time.LocalDateTime
 import java.util.*
 import java.util.regex.Pattern
 
@@ -23,7 +26,8 @@ class TimeBleDeviceManager(
 
     private val LOGTAG = TimeBleDeviceManager::class.java.simpleName
     private var bluetoothGatt: BluetoothGatt? = null
-    private var currentTimeCharacteristic: BluetoothGattCharacteristic = BluetoothGattCharacteristic(CURRENT_TIME_CHAR_UUID, 0, 0)
+    private var currentTimeCharacteristic: BluetoothGattCharacteristic =
+        BluetoothGattCharacteristic(CURRENT_TIME_CHAR_UUID, 0, 0)
     private var characteristics: List<BluetoothGattCharacteristic>? = null
 
     //LiveData
@@ -46,7 +50,7 @@ class TimeBleDeviceManager(
         override fun onServicesDiscovered(gatt: BluetoothGatt?, status: Int) {
             super.onServicesDiscovered(gatt, status)
             Log.i(LOGTAG, "GATT services discovered from server.")
-            when(status) {
+            when (status) {
                 BluetoothGatt.GATT_SUCCESS -> {
                     gatt?.services?.let { services ->
                         for (service in services) {
@@ -57,11 +61,15 @@ class TimeBleDeviceManager(
                             Log.d(LOGTAG, "Gotcha!")
                             characteristics = service?.characteristics
                             characteristics?.let {
-                                currentTimeCharacteristic = service.getCharacteristic(CURRENT_TIME_CHAR_UUID)
+                                currentTimeCharacteristic =
+                                    service.getCharacteristic(CURRENT_TIME_CHAR_UUID)
                                 gatt.setCharacteristicNotification(currentTimeCharacteristic, true)
-                                val descriptor = currentTimeCharacteristic.getDescriptor(CURRENT_TIME_CLIENT_CHAR_CONFIG_UUID)?.apply {
-                                    value = BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
-                                }
+                                val descriptor =
+                                    currentTimeCharacteristic.getDescriptor(CURRENT_TIME_CLIENT_CHAR_CONFIG_UUID)
+                                        ?.apply {
+                                            value =
+                                                BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
+                                        }
                                 gatt.writeDescriptor(descriptor)
                                 Log.d(LOGTAG, "Wrote notification enable for $currentTimeCharacteristic")
                             }
@@ -115,9 +123,21 @@ class TimeBleDeviceManager(
 
         private fun parseTimeFrom(characteristic: BluetoothGattCharacteristic): String {
             //TODO: Format value to an actual time lol
-            return characteristic.value.joinToString(separator = " ") {
-                String.format("%02X", it)
-            }
+            val value = characteristic.value
+            val dateTime = LocalDateTime.of(
+                fromLittleEndian(
+                    value.copyOfRange(0, 2)
+                ),
+//                ByteBuffer.wrap(
+//                    value.copyOfRange(0, 2)
+//                ).short.toInt(), //Year
+                value[2].toInt(), //Month
+                value[3].toInt(), //Day
+                value[4].toInt(), //Hour
+                value[5].toInt(), //Minute
+                value[6].toInt() //Second
+            )
+            return dateTime.toString()
         }
     }
 
@@ -173,6 +193,7 @@ class TimeBleDeviceManager(
     companion object {
         private val TIME_SERVICE_UUID = UUID.fromString("00001805-0000-1000-8000-00805f9b34fb")
         private val CURRENT_TIME_CHAR_UUID = UUID.fromString("00002a2b-0000-1000-8000-00805f9b34fb")
-        private val CURRENT_TIME_CLIENT_CHAR_CONFIG_UUID = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb")
+        private val CURRENT_TIME_CLIENT_CHAR_CONFIG_UUID =
+            UUID.fromString("00002902-0000-1000-8000-00805f9b34fb")
     }
 }

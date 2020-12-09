@@ -2,7 +2,7 @@ package com.ramiasia.ekoapp1
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.ramiasia.ekoapp1.ui.time.TimeFragment
+import com.ramiasia.ekoapp1.ui.TimeFragment
 
 class MainActivity : AppCompatActivity() {
 
