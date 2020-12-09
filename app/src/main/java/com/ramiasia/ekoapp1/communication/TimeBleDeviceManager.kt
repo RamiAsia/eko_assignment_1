@@ -5,7 +5,6 @@ import android.companion.AssociationRequest
 import android.companion.BluetoothDeviceFilter
 import android.companion.CompanionDeviceManager
 import android.content.Context
-import android.os.ParcelUuid
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -19,7 +18,6 @@ import java.util.regex.Pattern
 class TimeBleDeviceManager(
     private val context: Context?,
     private val deviceManager: CompanionDeviceManager?,
-    private val bluetoothAdapter: BluetoothAdapter?,
     private val callBack: CompanionDeviceManager.Callback
 ) {
 
@@ -41,12 +39,15 @@ class TimeBleDeviceManager(
 
     //BluetoothGattCallback (Opting for composition here as opposed to inheritance)
     private val bleGattCallback: BluetoothGattCallback = object : BluetoothGattCallback() {
+
+        /**
+         * When finding the services, enable notifications for the current time characteristic
+         */
         override fun onServicesDiscovered(gatt: BluetoothGatt?, status: Int) {
             super.onServicesDiscovered(gatt, status)
             Log.i(LOGTAG, "GATT services discovered from server.")
             when(status) {
                 BluetoothGatt.GATT_SUCCESS -> {
-                    //TODO: Set notifications up for time characteristic from 1805 service
                     gatt?.services?.let {
                         for (service in it) {
                             Log.d(LOGTAG, "Service found: ${service.uuid} of $service")
@@ -58,11 +59,11 @@ class TimeBleDeviceManager(
                                         Log.d(LOGTAG, "Characteristic found: ${characteristic.uuid} of $characteristics")
                                         if (characteristic.uuid == CURRENT_TIME_CHAR_UUID) {
                                             currentTimeCharacteristic = characteristic
-                                            gatt?.setCharacteristicNotification(currentTimeCharacteristic, true)
+                                            gatt.setCharacteristicNotification(currentTimeCharacteristic, true)
                                             val descriptor = currentTimeCharacteristic.getDescriptor(CURRENT_TIME_CLIENT_CHAR_CONFIG_UUID)?.apply {
                                                 value = BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
                                             }
-                                            gatt?.writeDescriptor(descriptor)
+                                            gatt.writeDescriptor(descriptor)
                                             Log.d(LOGTAG, "Wrote notification enable for $characteristic")
                                         }
                                     }

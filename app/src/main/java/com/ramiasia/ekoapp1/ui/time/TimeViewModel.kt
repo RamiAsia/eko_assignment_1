@@ -11,8 +11,6 @@ import com.ramiasia.ekoapp1.communication.TimeBleDeviceManager
  */
 class TimeViewModel(private val timeBleDeviceManager: TimeBleDeviceManager? = null) : ViewModel() {
 
-//    private val LOGTAG = TimeViewModel::class.java.simpleName
-
     //LiveData
     var time: LiveData<String>? = timeBleDeviceManager?.time
     var connectionState: LiveData<Int>? = timeBleDeviceManager?.connectionState

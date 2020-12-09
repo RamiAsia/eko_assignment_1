@@ -106,7 +106,6 @@ class TimeFragment : Fragment() {
         timeBleDeviceManager = TimeBleDeviceManager(
             context,
             companionDeviceManager,
-            bluetoothAdapter,
             object : CompanionDeviceManager.Callback() {
                 override fun onDeviceFound(chooserLauncher: IntentSender?) {
                     startIntentSenderForResult(
