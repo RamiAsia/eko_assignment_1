@@ -38,6 +38,9 @@ class TimeFragment : Fragment() {
     private var bluetoothManager: BluetoothManager? = null
     private var bluetoothAdapter: BluetoothAdapter? = null
 
+
+    // Overridden Fragment methods
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         companionDeviceManager = getSystemService(context!!, CompanionDeviceManager::class.java)
@@ -45,26 +48,93 @@ class TimeFragment : Fragment() {
         bluetoothAdapter = bluetoothManager?.adapter
     }
 
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View {
-        timeBleDeviceManager = TimeBleDeviceManager(context, companionDeviceManager, bluetoothAdapter, object : CompanionDeviceManager.Callback() {
-            override fun onDeviceFound(chooserLauncher: IntentSender?) {
-                startIntentSenderForResult(chooserLauncher,
-                        SELECT_DEVICE_REQ_CODE, null, 0, 0, 0, null)
-            }
-
-            override fun onFailure(error: CharSequence?) {
-                Toast.makeText(context, getString(R.string.txt_connection_error), Toast.LENGTH_LONG).show()
-            }
-
-        })
-
-        viewModel = ViewModelProvider(this).get(TimeViewModel::class.java)
-        viewModel.timeBleDeviceManager = timeBleDeviceManager
-
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        //Initialize our ViewModel
+        initViewModel()
         val view = inflater.inflate(R.layout.main_fragment, container, false)
+        //Initialize the UI elements
+        initUi(view)
+        return view
+    }
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        when (requestCode) {
+            //Handle device selected through CompanionDeviceManager
+            SELECT_DEVICE_REQ_CODE -> when (resultCode) {
+                Activity.RESULT_OK -> {
+                    val deviceToPair: BluetoothDevice? =
+                        data?.getParcelableExtra(CompanionDeviceManager.EXTRA_DEVICE)
+                    deviceToPair?.let {
+                        // Call on viewModel to handle logic of connecting to the device and minimize
+                        // the logic on the Fragment's end.
+                        viewModel.connect(deviceToPair)
+                    }
+                }
+            }
+            //Handle result of trying to enable Bluetooth
+            ENABLE_BT_REQ_CODE -> when (resultCode) {
+                Activity.RESULT_OK -> {
+                    Toast.makeText(
+                        context,
+                        "Hooray! Bluetooth is now enabled and ready to scan.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+                else -> {
+                    Toast.makeText(
+                        context,
+                        "Please enable bluetooth. Bluetooth is needed for connection.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+        }
+    }
+
+    // Utility methods
+
+    /**
+     * All logic used for initializing our [TimeViewModel] is neatly separated to this method.
+     * A custom [ViewModelProvider.Factory] is needed for [TimeViewModel], as a
+     * [TimeBleDeviceManager] is expected as an arg.
+     */
+    private fun initViewModel() {
+        timeBleDeviceManager = TimeBleDeviceManager(
+            context,
+            companionDeviceManager,
+            bluetoothAdapter,
+            object : CompanionDeviceManager.Callback() {
+                override fun onDeviceFound(chooserLauncher: IntentSender?) {
+                    startIntentSenderForResult(
+                        chooserLauncher,
+                        SELECT_DEVICE_REQ_CODE, null, 0, 0, 0, null
+                    )
+                }
+
+                override fun onFailure(error: CharSequence?) {
+                    Toast.makeText(
+                        context,
+                        getString(R.string.txt_connection_error),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+
+            })
+        val factory = TimeViewModelFactory(timeBleDeviceManager)
+        viewModel = ViewModelProvider(this, factory).get(TimeViewModel::class.java)
+    }
+
+    /**
+     * Initializes the individual UI elements of the [Fragment], given an inflated [View]
+     * hosting the elements.
+     *
+     * @param view The View hosting our UI elements
+     */
+    private fun initUi(view: View) {
         timeTextView = view.findViewById(R.id.timeTextView)
         deviceTextView = view.findViewById(R.id.deviceTextView)
         fab = view.findViewById(R.id.floatingActionButton)
@@ -79,34 +149,8 @@ class TimeFragment : Fragment() {
             }
         }
 
-        viewModel.deviceName.observe(this) {
+        viewModel.deviceName?.observe(this) {
             deviceTextView.text = it
-        }
-
-        return view
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        when (requestCode) {
-            SELECT_DEVICE_REQ_CODE -> when(resultCode) {
-                Activity.RESULT_OK -> {
-                    // User has chosen to pair with the Bluetooth device.
-                    val deviceToPair: BluetoothDevice? =
-                            data?.getParcelableExtra(CompanionDeviceManager.EXTRA_DEVICE)
-                    deviceToPair?.let {
-                        viewModel.connect(deviceToPair)
-                    }
-                }
-            }
-            ENABLE_BT_REQ_CODE -> when(resultCode) {
-                Activity.RESULT_OK -> {
-                    Toast.makeText(context, "Hooray! Bluetooth is now enabled and ready to scan.", Toast.LENGTH_SHORT).show()
-                }
-                else -> {
-                    Toast.makeText(context, "Please turn on your bluetooth? Bluetooth is needed for connection.", Toast.LENGTH_SHORT).show()
-                }
-            }
         }
     }
 
