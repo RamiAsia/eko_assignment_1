@@ -4,6 +4,7 @@ import android.app.Activity
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
+import android.bluetooth.BluetoothProfile
 import android.companion.CompanionDeviceManager
 import android.content.Intent
 import android.content.IntentSender
@@ -11,6 +12,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.ContextCompat.getSystemService
@@ -28,15 +30,18 @@ class TimeFragment : Fragment() {
         private const val ENABLE_BT_REQ_CODE = 315
     }
 
-    private var companionDeviceManager: CompanionDeviceManager? = null
-
+    //UI elements
     private lateinit var viewModel: TimeViewModel
     private lateinit var timeTextView: TextView
     private lateinit var deviceTextView: TextView
+    private lateinit var readButton: Button
     private lateinit var fab: FloatingActionButton
+
+    //BLE objects
     private lateinit var timeBleDeviceManager: TimeBleDeviceManager
     private var bluetoothManager: BluetoothManager? = null
     private var bluetoothAdapter: BluetoothAdapter? = null
+    private var companionDeviceManager: CompanionDeviceManager? = null
 
 
     // Overridden Fragment methods
@@ -136,6 +141,10 @@ class TimeFragment : Fragment() {
     private fun initUi(view: View) {
         timeTextView = view.findViewById(R.id.timeTextView)
         deviceTextView = view.findViewById(R.id.deviceTextView)
+        readButton = view.findViewById(R.id.btn_read)
+        readButton.setOnClickListener {
+            viewModel.requestTime()
+        }
         fab = view.findViewById(R.id.floatingActionButton)
         fab.setOnClickListener {
             bluetoothAdapter?.let {
@@ -148,8 +157,23 @@ class TimeFragment : Fragment() {
             }
         }
 
+        //Livedata observations:
         viewModel.deviceName?.observe(this) {
             deviceTextView.text = it
+        }
+        viewModel.connectionState?.observe(this) { state ->
+            when (state) {
+                BluetoothProfile.STATE_CONNECTED -> {
+                    readButton.isEnabled = true
+                }
+                else -> {
+                    readButton.isEnabled = false
+                    timeTextView.text = getString(R.string.txt_time_placeholder)
+                }
+            }
+        }
+        viewModel.time?.observe(this) {
+            timeTextView.text = it
         }
     }
 

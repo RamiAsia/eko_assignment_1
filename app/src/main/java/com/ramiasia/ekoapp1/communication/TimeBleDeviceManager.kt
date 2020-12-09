@@ -8,6 +8,7 @@ import android.content.Context
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import java.nio.charset.Charset
 import java.util.*
 import java.util.regex.Pattern
 
@@ -109,13 +110,21 @@ class TimeBleDeviceManager(
         ) {
             when (status) {
                 BluetoothGatt.GATT_SUCCESS -> {
-                    Log.d(LOGTAG, "Received characteristic: $characteristic")
+                    Log.d(LOGTAG, "Received characteristic: ${characteristic.uuid}")
+                    if (characteristic.uuid == CURRENT_TIME_CHAR_UUID) {
+                        _time.postValue(parseTimeFrom(characteristic))
+                    }
                 }
             }
         }
+
+        private fun parseTimeFrom(characteristic: BluetoothGattCharacteristic): String {
+//            characteristic.value.toString()
+            return characteristic.value.joinToString(separator = " ") {
+                String.format("%02X", it)
+            }
+        }
     }
-
-
 
 
     /**
@@ -148,6 +157,13 @@ class TimeBleDeviceManager(
     fun connect(bluetoothDevice: BluetoothDevice) {
         bluetoothDevice.createBond()
         bluetoothGatt = bluetoothDevice.connectGatt(context, true, bleGattCallback)
+    }
+
+    /**
+     * Requests time from connected BLE device with Time service, if available.
+     */
+    fun requestTime() {
+        bluetoothGatt?.readCharacteristic(currentTimeCharacteristic)
     }
 
     /**

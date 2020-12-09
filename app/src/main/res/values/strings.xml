@@ -6,4 +6,5 @@
     <string name="txt_connection_error">Sorry, connection failed due to an error.</string>
     <string name="txt_device_name_placeholder">Device name will be displayed here.</string>
     <string name="txt_time_placeholder">--:--:--</string>
+    <string name="txt_read">Read Time</string>
 </resources>

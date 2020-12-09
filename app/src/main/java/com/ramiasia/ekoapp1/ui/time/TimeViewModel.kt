@@ -17,8 +17,20 @@ class TimeViewModel(private val timeBleDeviceManager: TimeBleDeviceManager? = nu
     var deviceName: LiveData<String>? = timeBleDeviceManager?.deviceName
 
 
+    /**
+     * Connect to a [BluetoothDevice].
+     *
+     * @param bluetoothDevice Device to connect to.
+     */
     fun connect(bluetoothDevice: BluetoothDevice) {
         timeBleDeviceManager?.connect(bluetoothDevice)
+    }
+
+    /**
+     * Requests time from [TimeBleDeviceManager].
+     */
+    fun requestTime() {
+        timeBleDeviceManager?.requestTime()
     }
 
     /**
