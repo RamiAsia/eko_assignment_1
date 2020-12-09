@@ -1,19 +1,18 @@
 package com.ramiasia.ekoapp1.ui.time
 
 import android.bluetooth.*
-import android.bluetooth.le.ScanResult
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.ramiasia.ekoapp1.communication.TimeDeviceManager
+import com.ramiasia.ekoapp1.communication.TimeBleDeviceManager
 
 class TimeViewModel : ViewModel() {
 
     private val LOGTAG = TimeViewModel::class.java.simpleName
 
     //TODO: Make constructor arg through ViewModelProvider and set private
-    var timeDeviceManager: TimeDeviceManager? = null
+    var timeBleDeviceManager: TimeBleDeviceManager? = null
     private val bleGattCallback: BluetoothGattCallback = object : BluetoothGattCallback() {
         override fun onServicesDiscovered(gatt: BluetoothGatt?, status: Int) {
             super.onServicesDiscovered(gatt, status)
@@ -67,7 +66,7 @@ class TimeViewModel : ViewModel() {
 
 
     fun connect(bluetoothDevice: BluetoothDevice) {
-        timeDeviceManager?.connect(bluetoothDevice, bleGattCallback)
+        timeBleDeviceManager?.connect(bluetoothDevice, bleGattCallback)
     }
 
 

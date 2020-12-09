@@ -4,7 +4,6 @@ import android.app.Activity
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
-import android.bluetooth.le.ScanResult
 import android.companion.CompanionDeviceManager
 import android.content.Intent
 import android.content.IntentSender
@@ -19,7 +18,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.ramiasia.ekoapp1.R
-import com.ramiasia.ekoapp1.communication.TimeDeviceManager
+import com.ramiasia.ekoapp1.communication.TimeBleDeviceManager
 
 class TimeFragment : Fragment() {
 
@@ -35,7 +34,7 @@ class TimeFragment : Fragment() {
     private lateinit var timeTextView: TextView
     private lateinit var deviceTextView: TextView
     private lateinit var fab: FloatingActionButton
-    private lateinit var timeDeviceManager: TimeDeviceManager
+    private lateinit var timeBleDeviceManager: TimeBleDeviceManager
     private var bluetoothManager: BluetoothManager? = null
     private var bluetoothAdapter: BluetoothAdapter? = null
 
@@ -49,7 +48,7 @@ class TimeFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
-        timeDeviceManager = TimeDeviceManager(context, companionDeviceManager, bluetoothAdapter, object : CompanionDeviceManager.Callback() {
+        timeBleDeviceManager = TimeBleDeviceManager(context, companionDeviceManager, bluetoothAdapter, object : CompanionDeviceManager.Callback() {
             override fun onDeviceFound(chooserLauncher: IntentSender?) {
                 startIntentSenderForResult(chooserLauncher,
                         SELECT_DEVICE_REQ_CODE, null, 0, 0, 0, null)
@@ -62,7 +61,7 @@ class TimeFragment : Fragment() {
         })
 
         viewModel = ViewModelProvider(this).get(TimeViewModel::class.java)
-        viewModel.timeDeviceManager = timeDeviceManager
+        viewModel.timeBleDeviceManager = timeBleDeviceManager
 
         val view = inflater.inflate(R.layout.main_fragment, container, false)
 
@@ -75,7 +74,7 @@ class TimeFragment : Fragment() {
                     val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
                     startActivityForResult(enableBtIntent, ENABLE_BT_REQ_CODE)
                 } else {
-                    timeDeviceManager.scan()
+                    timeBleDeviceManager.scan()
                 }
             }
         }

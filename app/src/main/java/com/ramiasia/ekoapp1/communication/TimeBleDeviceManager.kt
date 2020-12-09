@@ -2,16 +2,14 @@ package com.ramiasia.ekoapp1.communication
 
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
-import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCallback
-import android.bluetooth.le.ScanResult
 import android.companion.AssociationRequest
 import android.companion.BluetoothDeviceFilter
 import android.companion.CompanionDeviceManager
 import android.content.Context
 import java.util.regex.Pattern
 
-class TimeDeviceManager(
+class TimeBleDeviceManager(
         private val context: Context?,
         private val deviceManager: CompanionDeviceManager?,
         private val bluetoothAdapter: BluetoothAdapter?,
