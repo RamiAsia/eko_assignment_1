@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Eko App 1</string>
+    <string name="txt_time_title">Current Time</string>
+    <string name="txt_scan_device">Scan for devices</string>
+    <string name="txt_connect_device">Connect</string>
+    <string name="txt_connection_error">Sorry, connection failed due to an error.</string>
+    <string name="txt_device_name_placeholder">Device name will be displayed here.</string>
+    <string name="txt_time_placeholder">--:--:--</string>
+</resources>
