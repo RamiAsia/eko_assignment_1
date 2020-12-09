@@ -20,7 +20,7 @@ import java.util.regex.Pattern
 class TimeBleDeviceManager(
     private val context: Context?,
     private val deviceManager: CompanionDeviceManager?,
-    private val callBack: CompanionDeviceManager.Callback
+    private val callBack: CompanionDeviceManager.Callback? = null
 ) {
 
     private val LOGTAG = TimeBleDeviceManager::class.java.simpleName
@@ -158,8 +158,9 @@ class TimeBleDeviceManager(
             .addDeviceFilter(deviceFilter)
             .setSingleDevice(false)
             .build()
-
-        deviceManager?.associate(pairingRequest, callBack, null)
+        callBack?.let {
+            deviceManager?.associate(pairingRequest, callBack, null)
+        }
     }
 
     /**
